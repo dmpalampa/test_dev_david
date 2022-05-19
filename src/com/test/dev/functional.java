@@ -40,7 +40,14 @@ public class functional {
 		JSONArray recipes = recipeStat();
 		ArrayList<String> listOfRecipes = new ArrayList<>();
 		ArrayList<Integer> recipesPostCodeList = new ArrayList<>();
+		JSONObject objecToReturn = objecToReturn = new JSONObject();
 		try {
+
+			if (recipes == null)
+			{
+				objecToReturn.put("ERROR OCCURED WHILE PROCESSING busiest_postcode ", null);
+				return Response.status(200).entity(objecToReturn).build();
+			}
 			for (Object recipeObject : recipes) {
 				JSONObject myJSONObject = new JSONObject();
 				// If you want to get JSONObject
@@ -54,18 +61,17 @@ public class functional {
 				}
 			}
 			HashSet<String> hashSet = new HashSet<>(listOfRecipes);
-			JSONObject object = new JSONObject();
-			object.put("unique_recipe_count", hashSet.size());
-			return Response.status(200).entity(object).build();
+			objecToReturn.put("unique_recipe_count", hashSet.size());
+			return Response.status(200).entity(objecToReturn).build();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
-	
-	
+
 	/*
-	 * 2. Count the number of occurences for each unique recipe name (alphabetically ordered by recipe name).
+	 * 2. Count the number of occurences for each unique recipe name (alphabetically
+	 * ordered by recipe name).
 	 */
 	@GET
 	@Path("/count_per_recipe")
@@ -77,7 +83,14 @@ public class functional {
 		JSONParser parser = new JSONParser();
 		JSONArray recipes = recipeStat();
 		ArrayList<String> listOfRecipes = new ArrayList<>();
+		JSONObject objecToReturn = objecToReturn = new JSONObject();
 		try {
+
+			if (recipes == null)
+			{
+				objecToReturn.put("ERROR OCCURED WHILE PROCESSING busiest_postcode ", null);
+				return Response.status(200).entity(objecToReturn).build();
+			}
 			for (Object recipeObject : recipes) {
 				JSONObject myJSONObject = new JSONObject();
 				// If you want to get JSONObject
@@ -96,17 +109,14 @@ public class functional {
 				obj.put("count", count);
 				objArray.add(obj);
 			}
-			JSONObject o = new JSONObject();
-			o.put("count_per_recipe", objArray);
-			return Response.status(200).entity(o).build();
+			objecToReturn.put("count_per_recipe", objArray);
+			return Response.status(200).entity(objecToReturn).build();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 
-	
-	
 	/*
 	 * 3. Find the postcode with most delivered recipes.
 	 */
@@ -115,12 +125,18 @@ public class functional {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response mostFrequent() {
 
-		JSONParser parser = new JSONParser();//creating instance os json parser
+		JSONParser parser = new JSONParser();// creating instance os json parser
 		JSONArray recipes = recipeStat();
 		ArrayList<String> listOfRecipes = new ArrayList<>();
 		ArrayList<Integer> recipesPostCodeList = new ArrayList<>();
+		JSONObject objecToReturn = objecToReturn = new JSONObject();
 		try {
 
+			if (recipes == null)
+			{
+				objecToReturn.put("ERROR OCCURED WHILE PROCESSING busiest_postcode ", null);
+				return Response.status(200).entity(objecToReturn).build();
+			}
 			for (Object recipeObject : recipes) {
 				JSONObject myJSONObject = new JSONObject();
 				// If you want to get JSONObject
@@ -148,10 +164,9 @@ public class functional {
 					}
 				}
 
-				JSONObject object = new JSONObject();
-				object.put("postcode", mostFrequentValue);
-				object.put("delivery_count", maxValue);
-				return Response.status(200).entity(object).build();
+				objecToReturn.put("postcode", mostFrequentValue);
+				objecToReturn.put("delivery_count", maxValue);
+				return Response.status(200).entity(objecToReturn).build();
 			}
 
 		} catch (Exception e) {
@@ -161,10 +176,8 @@ public class functional {
 	}
 
 	/*
-	 *4.  List the recipe names (alphabetically ordered) that contain in their name one of the following words:
-		Potato
-		Veggie
-		Mushroom
+	 * 4. List the recipe names (alphabetically ordered) that contain in their name
+	 * one of the following words: Potato Veggie Mushroom
 	 */
 	@POST
 	@Path("/match_by_name")
@@ -177,21 +190,26 @@ public class functional {
 
 		ArrayList<String> listOfRecipes = new ArrayList<>();
 		ArrayList<String> searchResultsList = new ArrayList<>();
+		JSONObject object = new JSONObject();
 		try {
-			
+
 			JSONObject dataObject = (JSONObject) parser.parse(postData);
-			
+			if (recipes == null)
+			{
+				object.put("ERROR OCCURED WHILE PROCESSING match_by_name ", null);
+				return Response.status(200).entity(object).build();
+			}
 			for (Object recipeObject : recipes) {
 				JSONObject myJSONObject = new JSONObject();
 				// If you want to get JSONObject
 				myJSONObject = (JSONObject) recipeObject;
 				if (recipeObject instanceof JSONObject) {
-					 myJSONObject = (JSONObject) parser.parse((recipeObject.toString()));
+					myJSONObject = (JSONObject) parser.parse((recipeObject.toString()));
 					String recipeName = (String) myJSONObject.get("recipe");
 					listOfRecipes.add(recipeName);
 				}
 			}
-			
+
 			String searchValue = (String) dataObject.get("searchValue");
 			for (String recipe : listOfRecipes) {
 				if (recipe.contains(searchValue)) {
@@ -200,7 +218,7 @@ public class functional {
 				}
 			}
 
-			//getting list of such results without duplicates
+			// getting list of such results without duplicates
 			List<String> UniqueRecipes = searchResultsList.stream().distinct().collect(Collectors.toList());
 
 			String[] searchResultsListArray = UniqueRecipes.toArray(new String[UniqueRecipes.size()]);
@@ -216,7 +234,7 @@ public class functional {
 					}
 				}
 			}
-			JSONObject object = new JSONObject();
+
 			object.put("match_by_name", searchResultsListArray);
 			return Response.status(200).entity(object).build();
 		} catch (Exception e) {
@@ -224,15 +242,15 @@ public class functional {
 		}
 		return null;
 	}
-	
-	/*Method to access and read data from data.json file*/
+
+	/* Method to access and read data from data.json file */
 	protected JSONArray recipeStat() {
 
 		JSONParser parser = new JSONParser();
 
 		try {
-			Object obj = parser.parse(new FileReader("./test_dev_david_/src/com/test/dev/data.json"));
-
+			Object obj = parser.parse(new FileReader(
+					"C:\\Users\\Dell\\monitor_workspace\\test_dev_david_\\src\\com\\test\\dev\\data.json"));
 			JSONArray recipes = (JSONArray) obj;
 			return recipes;
 
